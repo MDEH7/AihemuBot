@@ -1,7 +1,6 @@
 import datetime
 import discord
 from discord.ext import commands
-from typing import Union
 from discord.ext.commands import BadUnionArgument, MissingRequiredArgument
 
 intents = discord.Intents.default() # All intents except presences are enabled
@@ -17,23 +16,22 @@ async def membercount(ctx):
     await ctx.send(f"Member count: {ctx.guild.member_count}") # Displays the total number of users, including other bots
 
 @bot.command()
-async def joindate(ctx, member: str):
+async def joindate(ctx, member: str = None):
+
+    if member is None: # If the user doesn't input an ID
+        member = ctx.author.id
+
     try:
         memberID_int = int(member)
     except ValueError:
-        await ctx.send(f"Invalid input!\n"
+        await ctx.send(f"Invalid input! "
                        f"ID can only be numbers.\n"
                        f"`Usage: $joindate [ID]`")
+        return
 
-    except MissingRequiredArgument:
-        await ctx.send(f"Missing ID!\n"
-                       f"`Usage: $joindate [ID]`")
-
-
-    # If the user supplied ID is not 18 digits long
-    if len(str(memberID_int)) != 18:
+    # If the user supplied ID is more than 19 numbers long or less than 15 numbers
+    if len(str(memberID_int)) > 19 or len(str(memberID_int)) < 15:
         await ctx.send(f"Invalid ID!\n"
-                       f"ID must be 18 digits long.\n"
                        f"`Usage: $joindate [ID]`")
         return
 
