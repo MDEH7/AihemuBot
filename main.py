@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord.ext import commands
-from discord.ext.commands import BadUnionArgument, MissingRequiredArgument, MemberConverter, UserConverter, UserNotFound
+from discord.ext.commands import BadUnionArgument,UserConverter, UserNotFound
 from typing import Union
 import asyncio
 
@@ -9,6 +9,7 @@ intents = discord.Intents.default() # All intents except presences are enabled
 intents.message_content = True
 intents.messages = True
 intents.members = True
+
 
 with open("bot_prefix.txt", "r") as bot_prefix_obj:
     aihemuBotPrefix = bot_prefix_obj.readline()
@@ -21,48 +22,42 @@ async def membercount(ctx):
     await ctx.send(f"Member count: {ctx.guild.member_count}") # Displays the total number of users, including other bots
 
 @bot.command()
-async def joindate(ctx, member: Union[discord.User, str] = None):
+async def joindate(ctx, member: str = None): # Users can only input valid Discord IDs
     myGuild = bot.get_guild(726849822350508132)
-    discordUserID = 0
-    userID = 0
-    member_name = 0
 
     if member is None: # If the user doesn't input an ID
-        authorID = ctx.author.id
-        authorName = ctx.author.name
-        await ctx.send(f"{authorName} `[{authorID}]` is a member of {myGuild}! :)")
+        await ctx.send(f"{ctx.author.name} `[{ctx.author.id}]` is a member of {myGuild}! :)")
         return
 
-    elif isinstance(member, discord.User):
-        discordUserID = member.id
-        member_name = myGuild.get_member(userID or discordUserID or member)
-
-
     else:
-        try:
-            userID = await commands.UserConverter().convert(ctx, member)
-            member_name = myGuild.get_member(userID.id)
-            if len(str(userID)) > 19 or len(str(userID)) < 15:
-                await ctx.send(f"Invalid ID!\n"
-                               f"`Usage: $joindate [ID]`")
-                return
-        except ValueError:
-            await ctx.send(f"Invalid input! "
-                           f"ID can only be numbers.\n"
+        if not member.isdigit(): # Checking to see if the user did not input digits only
+            await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
                            f"`Usage: $joindate [ID]`")
             return
 
-        except discord.ext.commands.errors.UserNotFound:
-            await ctx.send(f"Invalid ID!\n"
-                           f"`Usage: $joindate [ID]`")
+        else:
+            if len(str(member)) > 19 or len(str(member)) < 15:
+                await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
+                               f"`Usage: $joindate [ID]`")
+                return
+
+            try:
+                discordMember = await UserConverter().convert(ctx, member)
+            except UserNotFound:
+                await ctx.send(f"Invalid ID! User with ID: `{member}` was not found!\n"
+                               f"`Usage: $joindate [ID]`")
+                return
+
+        member_name = myGuild.get_member(int(member))
+
 
 
     # If a user is not a member of your server
     if member_name is None:
-        await ctx.send(f"{member.mention} `[{member.id}]` is not a member of {myGuild}!\n"
+        await ctx.send(f"{discordMember.mention} `[{discordMember.id}]` is not a member of {myGuild}!\n"
                        f"Why not invite them here? ¯\\_(ツ)_/¯")
     else:
-        await ctx.send(f"{member.name} `[{member.id}]` is a member of {myGuild}! :)")
+        await ctx.send(f"{discordMember.name} `[{discordMember.id}]` is a member of {myGuild}! :)")
 
 @bot.command()
 async def changeprefix(ctx, arg: Union[str, None]):
