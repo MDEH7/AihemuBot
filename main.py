@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord.ext import commands
-from discord.ext.commands import BadUnionArgument,UserConverter, UserNotFound
+from discord.ext.commands import BadUnionArgument, UserConverter, UserNotFound, MemberConverter
 from typing import Union
 import asyncio
 
@@ -26,7 +26,9 @@ async def joindate(ctx, member: str = None): # Users can only input valid Discor
     myGuild = bot.get_guild(726849822350508132)
 
     if member is None: # If the user doesn't input an ID
-        await ctx.send(f"{ctx.author.name} `[{ctx.author.id}]` is a member of {myGuild}! :)")
+        discordMember = await MemberConverter().convert(ctx, ctx.author.name)
+        await ctx.send(f"{ctx.author.name} `[{ctx.author.id}]` is a member of {myGuild}! :)\n"
+                       f"You joined at `{discordMember.joined_at.strftime('%d/%m/%Y')}`")
         return
 
     else:
@@ -42,11 +44,17 @@ async def joindate(ctx, member: str = None): # Users can only input valid Discor
                 return
 
             try:
-                discordMember = await UserConverter().convert(ctx, member)
-            except UserNotFound:
-                await ctx.send(f"Invalid ID! User with ID: `{member}` was not found!\n"
-                               f"`Usage: $joindate [ID]`")
-                return
+                discordMember = await MemberConverter().convert(ctx, member) # Trying to convert the user into a Member object
+            except discord.ext.commands.errors.MemberNotFound:
+                try:
+                    discordMember = await UserConverter().convert(ctx, member) # Trying to convert the user into a User object
+                    await ctx.send(f"{discordMember.mention} `[{discordMember.id}]` is not a member of {myGuild}!\n"
+                                   f"Why not invite them here? ¯\\_(ツ)_/¯")
+                    return
+                except discord.ext.commands.errors.UserNotFound: # If the inputted ID does not belong to any user of the Discord app
+                    await ctx.send(f"Invalid ID! User with ID: `{member}` does not exist!\n"
+                                   f"`Usage: $joindate [ID]`")
+                    return
 
         member_name = myGuild.get_member(int(member))
 
@@ -57,7 +65,8 @@ async def joindate(ctx, member: str = None): # Users can only input valid Discor
         await ctx.send(f"{discordMember.mention} `[{discordMember.id}]` is not a member of {myGuild}!\n"
                        f"Why not invite them here? ¯\\_(ツ)_/¯")
     else:
-        await ctx.send(f"{discordMember.name} `[{discordMember.id}]` is a member of {myGuild}! :)")
+        await ctx.send(f"{discordMember.name} `[{discordMember.id}]` is a member of {myGuild}! :)\n"
+                       f"They joined at `{discordMember.joined_at.strftime('%d/%m/%Y')}`")
 
 @bot.command()
 async def changeprefix(ctx, arg: Union[str, None]):
