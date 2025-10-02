@@ -122,7 +122,7 @@ async def disableprefixmessage(ctx):
 @bot.command()
 async def botprefix(ctx):
     with open("bot_prefix.txt", "r") as bot_prefix:
-        prefix = bot_prefix.read(1)
+        prefix = bot_prefix.readline()
 
     await ctx.send(f"The bot prefix is `{prefix}`")
 
