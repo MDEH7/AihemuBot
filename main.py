@@ -31,32 +31,32 @@ async def joindate(ctx, member: str = None): # Users can only input valid Discor
                        f"You joined at `{discordMember.joined_at.strftime('%d/%m/%Y')}`")
         return
 
-    else:
-        if not member.isdigit(): # Checking to see if the user did not input digits only
-            await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
-                           f"`Usage: $joindate [ID]`")
-            return
 
-        else:
-            if len(str(member)) > 19 or len(str(member)) < 15:
-                await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
-                               f"`Usage: $joindate [ID]`")
+    elif not member.isdigit(): # Checking to see if the user did not input digits only
+        await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
+                       f"`Usage: {bot.command_prefix}joindate [ID]`")
+        return
+
+    elif len(str(member)) > 19 or len(str(member)) < 15:
+        await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
+                       f"`Usage: {bot.command_prefix}joindate [ID]`")
+        return
+
+    else:
+        try:
+            discordMember = await MemberConverter().convert(ctx, member) # Trying to convert the user into a Member object
+        except discord.ext.commands.errors.MemberNotFound:
+            try:
+                discordMember = await UserConverter().convert(ctx, member) # Trying to convert the user into a User object
+                await ctx.send(f"{discordMember.mention} `[{discordMember.id}]` is not a member of {myGuild}!\n"
+                               f"Why not invite them here? ¯\\_(ツ)_/¯")
+                return
+            except discord.ext.commands.errors.UserNotFound: # If the inputted ID does not belong to any user of the Discord app
+                await ctx.send(f"Invalid ID! User with ID: `{member}` does not exist!\n"
+                               f"`Usage: {bot.command_prefix}joindate [ID]`")
                 return
 
-            try:
-                discordMember = await MemberConverter().convert(ctx, member) # Trying to convert the user into a Member object
-            except discord.ext.commands.errors.MemberNotFound:
-                try:
-                    discordMember = await UserConverter().convert(ctx, member) # Trying to convert the user into a User object
-                    await ctx.send(f"{discordMember.mention} `[{discordMember.id}]` is not a member of {myGuild}!\n"
-                                   f"Why not invite them here? ¯\\_(ツ)_/¯")
-                    return
-                except discord.ext.commands.errors.UserNotFound: # If the inputted ID does not belong to any user of the Discord app
-                    await ctx.send(f"Invalid ID! User with ID: `{member}` does not exist!\n"
-                                   f"`Usage: $joindate [ID]`")
-                    return
-
-        member_name = myGuild.get_member(int(member))
+    member_name = myGuild.get_member(int(member))
 
 
 
