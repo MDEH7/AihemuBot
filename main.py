@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord.ext import commands
-from discord.ext.commands import BadUnionArgument, UserConverter, UserNotFound, MemberConverter
+from discord.ext.commands import BadUnionArgument, UserConverter, UserNotFound, MemberConverter, MemberNotFound
 from typing import Union
 import asyncio
 
@@ -125,6 +125,54 @@ async def botprefix(ctx):
         prefix = bot_prefix.readline()
 
     await ctx.send(f"The bot prefix is `{prefix}`")
+
+@bot.command()
+async def ban(ctx, user: discord.Member = None):
+
+    if user is None:
+        await ctx.send(f"Incorrect usage!\n"
+                       f"Correct usage: `{bot.command_prefix}ban [userID]`")
+        return
+
+    elif not str(user.id).isdigit():
+        await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
+                       f"`Usage: {bot.command_prefix}ban [ID]`")
+        return
+
+    elif len(str(user.id)) > 19 or len(str(user.id)) < 15:
+        await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
+                       f"`Usage: {bot.command_prefix}ban [ID]`")
+        return
+
+
+    try:
+        await ctx.guild.ban(user)
+
+    except discord.ext.commands.errors.MemberNotFound:
+        await ctx.send(f"Invalid ID! User with ID: `{user.id}` was not found!\n"
+                       f"`Usage: {bot.command_prefix}ban [ID]`")
+        return
+
+    await ctx.send(f"{user.name} was banned by {ctx.author.name}!")
+
+
+@bot.command()
+async def unban(ctx, user: discord.User = None):
+    if user is None:
+        await ctx.send(f"Incorrect usage!\n"
+                       f"Correct usage: `{bot.command_prefix}unban [userID]`")
+        return
+
+    try:
+        await ctx.guild.unban(user)
+
+    except discord.ext.commands.errors.UserNotFound:
+        await ctx.send(f"Invalid ID! User with ID: `{user.id}` does not exist!\n"
+                       f"`Usage: {bot.command_prefix}ban [ID]`")
+        return
+
+    await ctx.send(f"{user.name} was unbanned by {ctx.author.name}!")
+
 
 @bot.event
 async def on_ready():
