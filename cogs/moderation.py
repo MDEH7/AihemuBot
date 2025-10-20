@@ -10,13 +10,6 @@ intents.members = True
 intents.moderation = True
 
 
-
-with open("../bot_prefix.txt", "r") as bot_prefix_obj:
-    aihemuBotPrefix = bot_prefix_obj.readline()
-
-bot = commands.Bot(command_prefix=aihemuBotPrefix, intents=intents, case_insensitive=True)
-
-
 class moderatorCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -26,18 +19,18 @@ class moderatorCommands(commands.Cog):
 
         if user is None:
             await ctx.send(f"Incorrect usage!\n"
-                           f"Correct usage: `{bot.command_prefix}ban [userID]`")
+                           f"Correct usage: `{self.bot.command_prefix}ban [userID]`")
             return
 
 
         elif not user.isdigit():
             await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
-                           f"`Usage: {bot.command_prefix}ban [userID]`")
+                           f"`Usage: {self.bot.command_prefix}ban [userID]`")
             return
 
         elif len(user) > 19 or len(user) < 15:
             await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
-                           f"`Usage: {bot.command_prefix}ban [userID]`")
+                           f"`Usage: {self.bot.command_prefix}ban [userID]`")
             return
 
         try:  # Trying to convert the user into a Member object
@@ -49,7 +42,7 @@ class moderatorCommands(commands.Cog):
 
             except discord.ext.commands.errors.UserNotFound:
                 await ctx.send(f"Invalid ID! User with ID: `{user}` does not exist!\n"
-                               f"`Usage: {bot.command_prefix}ban [userID]`")
+                               f"`Usage: {self.bot.command_prefix}ban [userID]`")
                 return
 
             await ctx.send(f"Ban failed! {bannedMember.mention} `{bannedMember.id}` is not a member of the server!")
@@ -63,17 +56,17 @@ class moderatorCommands(commands.Cog):
 
         if user is None:
             await ctx.send(f"Incorrect usage!\n"
-                           f"Correct usage: `{bot.command_prefix}unban [userID]`")
+                           f"Correct usage: `{self.bot.command_prefix}unban [userID]`")
             return
 
         elif not user.isdigit():
             await ctx.send(f"Invalid ID! ID can only contain numbers!\n"
-                           f"`Usage: {bot.command_prefix}unban [userID]`")
+                           f"`Usage: {self.bot.command_prefix}unban [userID]`")
             return
 
         elif len(user) > 19 or len(user) < 15:
             await ctx.send(f"Invalid ID! ID must between 15 to 19 numbers long inclusive!\n"
-                           f"`Usage: {bot.command_prefix}unban [userID]`")
+                           f"`Usage: {self.bot.command_prefix}unban [userID]`")
             return
 
         try:
@@ -82,7 +75,7 @@ class moderatorCommands(commands.Cog):
 
         except discord.ext.commands.errors.UserNotFound:
             await ctx.send(f"Invalid ID! User with ID: `{user}` does not exist!\n"
-                           f"`Usage: {bot.command_prefix}unban [userID]`")
+                           f"`Usage: {self.bot.command_prefix}unban [userID]`")
             return
 
         except discord.HTTPException:  # If the user being unbanned is not banned

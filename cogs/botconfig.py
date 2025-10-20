@@ -10,11 +10,6 @@ intents.messages = True
 intents.members = True
 intents.moderation = True
 
-with open("../bot_prefix.txt", "r") as bot_prefix_obj:
-    aihemuBotPrefix = bot_prefix_obj.readline()
-
-bot = commands.Bot(command_prefix=aihemuBotPrefix, intents=intents, case_insensitive=True)
-
 
 class BotConfig(commands.Cog):
 
@@ -25,20 +20,20 @@ class BotConfig(commands.Cog):
     async def changeprefix(self, ctx, arg: Union[str, None]):
         if arg is None:
             await ctx.send(f"Are you trying to break this command? <:neutralexpr:1233524707110948884>\n"
-                           f"This is the correct usage: `{bot.command_prefix}changeprefix [prefix]`")
+                           f"This is the correct usage: `{self.bot.command_prefix}changeprefix [prefix]`")
             return
 
         with open("prefix_message.txt", "r") as prefix_msg:
             p_msg = prefix_msg.readline()
 
-        before = bot.command_prefix
+        before = self.bot.command_prefix
         with open("bot_prefix.txt", "w") as prefix_obj:
             prefix_obj.write(arg)
 
         with open("bot_prefix.txt", "r") as read_prefix:
-            bot.command_prefix = read_prefix.readline()
+            self.bot.command_prefix = read_prefix.readline()
 
-        await ctx.send(f"You successfully changed the prefix from `{before}` to `{bot.command_prefix}`")
+        await ctx.send(f"You successfully changed the prefix from `{before}` to `{self.bot.command_prefix}`")
         if len(arg) > 1 and p_msg == "True":
             await asyncio.sleep(0.75)
             await ctx.send(f"-# Yes! The prefix can be longer than 1 character! Why? Because I'm generous!")
